@@ -1,11 +1,14 @@
+import { api } from "./api_key.js";
+
 const chat = document.getElementById("chat");
 const promptInput = document.getElementById("prompt");
 const sendBtn = document.getElementById("sendBtn");
 
-const API_URL =
-    "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const API_KEY = "Add your api key here please";
+// const API_URL =
+//     "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 
+const API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const API_KEY = api;
 let conversation = [];
 
 sendBtn.addEventListener("click", sendMessage);
@@ -59,7 +62,7 @@ async function sendMessage() {
             },
 
             body: JSON.stringify({
-                model: "gemini-3.7-flash",
+                model: "openai/gpt-oss-120b",
                 messages: conversation,
             }),
         });
