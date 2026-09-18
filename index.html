@@ -1,29 +1,303 @@
 <!doctype html>
-<html lang="en">
+<html lang="am" data-theme="dark">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Selam AI (ሰላም AI) - የኢትዮጵያ ብልህ አጋር | Ethiopian AI Companion</title>
+        <meta name="description" content="Selam AI - A fast, culturally intelligent Ethiopian AI Assistant supporting Amharic, Afaan Oromoo, Tigrinya, and English. Explore Ethiopian history, culture, calendar, and programming help." />
 
-        <title>AI Chat</title>
+        <!-- Google Fonts: Noto Sans Ethiopic & Plus Jakarta Sans -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+
+        <!-- Highlight.js for Syntax Highlighting in Code Blocks -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+        />
 
         <link rel="stylesheet" href="style.css" />
     </head>
 
     <body>
-        <div class="container">
-            <h1>AI Chat</h1>
+        <div class="app-container">
+            <!-- Sidebar for Chat History & Actions -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <a href="#" class="brand-badge">
+                        <div class="brand-icon-wrapper">
+                            <span>🦁</span>
+                        </div>
+                        <div>
+                            <div id="sidebarTitle">ሰላም AI</div>
+                            <div class="brand-flag-strip">
+                                <div class="g"></div>
+                                <div class="y"></div>
+                                <div class="r"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
 
-            <div id="chat">
-                <!-- Messages will appear here -->
-            </div>
+                <button class="new-chat-btn" id="newChatBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span id="newChatText">አዲስ ጭውውት</span>
+                </button>
 
-            <div class="input-area">
-                <input type="text" id="prompt" placeholder="Ask something..." />
+                <div class="history-section">
+                    <div class="history-title" id="historyTitle">የቀደሙ ጭውውቶች</div>
+                    <ul class="history-list" id="historyList">
+                        <!-- Populated by JavaScript -->
+                    </ul>
+                </div>
 
-                <button id="sendBtn">Send</button>
+                <div class="sidebar-footer">
+                    <button class="sidebar-action-btn" id="openCalendarModalBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span id="calendarToolText">የቀን መቁጠሪያ (Calendar)</span>
+                    </button>
+
+                    <button class="sidebar-action-btn" id="exportChatBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span id="exportChatText">ውይይት አውርድ</span>
+                    </button>
+
+                    <button class="sidebar-action-btn" id="clearChatBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <span id="clearChatText">ውይይት አጽዳ</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Backdrop overlay for mobile sidebar -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+            <!-- Main Chat Area -->
+            <main class="main-chat">
+                <!-- Header -->
+                <header class="chat-header">
+                    <div class="header-left">
+                        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        <!-- Live Ethiopian Calendar Date Badge -->
+                        <div class="eth-date-badge" id="ethDateBadge" title="የቀን መቀየሪያን ለመክፈት ይጫኑ">
+                            <span class="date-indicator-dot"></span>
+                            <span id="ethDateDisplay">መስከረም 2017 ዓ.ም</span>
+                        </div>
+                    </div>
+
+                    <div class="header-right">
+                        <!-- Language Switcher -->
+                        <div class="lang-select-wrapper">
+                            <select id="langSelect" aria-label="Language Selector">
+                                <option value="am" selected>አማርኛ (Amharic)</option>
+                                <option value="en">English</option>
+                                <option value="om">Afaan Oromoo</option>
+                                <option value="ti">ትግርኛ (Tigrinya)</option>
+                            </select>
+                        </div>
+
+                        <!-- Theme Toggle Button -->
+                        <button class="icon-btn" id="themeToggleBtn" aria-label="Toggle Theme" title="ቀለም ቀይር (Theme)">
+                            <svg id="themeIconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                            <svg id="themeIconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Settings Button -->
+                        <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="ቅንብሮች (Settings)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Scrollable Chat Body -->
+                <div class="chat-scroll-container" id="chatScrollContainer">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Empty State Hero (shown on fresh chat) -->
+                        <div class="empty-state" id="emptyState">
+                            <div class="empty-avatar-ring">
+                                <span>🇪🇹</span>
+                            </div>
+                            <h1 id="heroTitle">ሰላም! ዛሬ ምን ላግዝዎ?</h1>
+                            <p id="heroSubtitle">በቋንቋዎ ይጠይቁ — ታሪክ፣ ባህል፣ ትምህርት፣ ቴክኖሎጂ እና ሌሎችንም አብረን እንመርምር።</p>
+
+                            <!-- Ethiopian Prompt Chips Grid -->
+                            <div class="prompt-chips-grid" id="promptChipsGrid">
+                                <!-- Populated dynamically by script.js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-wrapper">
+                    <div class="input-container">
+                        <textarea
+                            id="prompt"
+                            class="auto-textarea"
+                            placeholder="ጥያቄዎን በአማርኛ ወይም በእንግሊዝኛ እዚህ ይጻፉ..."
+                            rows="1"
+                        ></textarea>
+
+                        <div class="input-controls">
+                            <!-- Voice Input Button -->
+                            <button class="input-btn" id="voiceBtn" aria-label="Voice Input" title="በድምፅ ለመጠየቅ ይጫኑ">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Send Button -->
+                            <button class="send-btn" id="sendBtn" aria-label="Send Message" title="ላክ">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-footer-info">
+                        <span id="charCountDisplay">0 ቁምፊዎች</span>
+                        <span>Shift + Enter ለአዲስ መስመር | Enter ለመላክ</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Ethiopian Calendar Modal -->
+        <div class="modal-overlay" id="dateConverterModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="modalDateTitle">📅 የቀን መቀየሪያ (Gregorian ⇄ Ethiopian)</h3>
+                    <button class="modal-close" id="closeDateModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="gregDateInput">የጎርጎሮሳውያን ቀን ይምረጡ (Gregorian Date):</label>
+                        <input type="date" id="gregDateInput" />
+                    </div>
+                    <div class="date-result-box" id="ethDateResult">
+                        <!-- Result displayed here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="closeDateModalBtn2">ዝጋ</button>
+                </div>
             </div>
         </div>
+
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="modalSettingsTitle">⚙️ የ AI ቅንብሮች</h3>
+                    <button class="modal-close" id="closeSettingsModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="modelSelect" id="lblModelSelect">የ AI ሞዴል (Model):</label>
+                        <select id="modelSelect">
+                            <option value="openai/gpt-oss-120b" selected>GPT-OSS 120B (ተመራጭ & ብልህ)</option>
+                            <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (ፈጣን)</option>
+                            <option value="openai/gpt-oss-20b">GPT-OSS 20B (ቀላል)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="personaSelect" id="lblPersonaSelect">የ AI ባሕሪ / አቀራረብ (Persona):</label>
+                        <select id="personaSelect">
+                            <option value="general" selected>ሰላም AI - ወዳጃዊ እና ባህላዊ አጋር</option>
+                            <option value="scholar">ፕሮፌሰር ያሬድ - የታሪክ እና ቅርስ ተመራማሪ</option>
+                            <option value="tutor">ቴክ ሀበሻ - የኮዲንግ እና ሳይንስ አስተማሪ</option>
+                            <option value="tourism">አቢሲኒያ አስጎብኚ - የቱሪዝም እና የቦታዎች መሪ</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customApiKeyInput" id="lblApiKey">የራስዎን Groq API Key ያስገቡ (አማራጭ):</label>
+                        <input type="password" id="customApiKeyInput" placeholder="gsk_..." />
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">ባዶ ከተዉት ነባሪው የክፍል ቁልፍ ይሰራል</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="closeSettingsModalBtn2">ሰርዝ</button>
+                    <button class="btn-primary" id="saveSettingsBtn">አስቀምጥ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clear Chat Confirmation Modal -->
+        <div class="modal-overlay" id="clearConfirmModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3 id="modalClearTitle">⚠️ ውይይት አጽዳ</h3>
+                    <button class="modal-close" id="closeClearModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="clearModalMessage">እርግጠኛ ነዎት ይህንን ውይይት ማጽዳት ይፈልጋሉ? የተደረጉ ንግግሮች በሙሉ ይሰረዛሉ።</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="cancelClearBtn">ተመለስ</button>
+                    <button class="btn-danger" id="confirmClearBtn">አዎ፣ አጽዳ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">
+            <span id="toastIcon">✓</span>
+            <span id="toastMessage">ተከናውኗል!</span>
+        </div>
+
+        <!-- External Libraries -->
         <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+        <!-- Main Logic Module -->
         <script src="script.js" type="module"></script>
     </body>
 </html>

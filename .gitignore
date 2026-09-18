@@ -1,1 +1,15 @@
+# API Keys & Secrets
 api_key.js
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Vercel & Build Artifacts
+.vercel/
+
+# Logs
+*.log
+npm-debug.log*
