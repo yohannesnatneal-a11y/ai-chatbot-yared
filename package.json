@@ -1,0 +1,21 @@
+{
+  "name": "ai-chatbot-yared",
+  "version": "1.0.0",
+  "description": "Selam AI (ሰላም AI) - Ethiopian AI Companion with Multilingual & Calendar Support",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "ethiopia",
+    "amharic",
+    "groq",
+    "vercel"
+  ],
+  "author": "Yared",
+  "license": "MIT"
+}
