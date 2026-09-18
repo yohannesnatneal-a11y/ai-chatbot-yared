@@ -1,18 +1,8 @@
 /**
  * Selam AI (ሰላም AI) - Main Application Controller
- * Integrates Groq API, Ethiopian Calendar, Multilingual UI, Voice Input, and Session Persistence.
+ * Integrates Groq API via secure /api/chat endpoint with Ethiopian Calendar,
+ * Multilingual UI, Voice Input, and Session Persistence.
  */
-
-// Attempt to load local api_key.js if it exists (ignored in git)
-let fallbackApiKey = "";
-try {
-    const keyModule = await import("./api_key.js").catch(() => null);
-    if (keyModule && keyModule.api) {
-        fallbackApiKey = keyModule.api;
-    }
-} catch (e) {
-    // api_key.js not present, which is standard when deploying or cloning from GitHub
-}
 
 import {
     toEthiopian,
@@ -113,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getApiKey() {
-    return customApiKey.trim() !== "" ? customApiKey.trim() : fallbackApiKey;
+    return customApiKey.trim();
 }
 
 // Setup Marked.js with syntax highlighting
@@ -573,56 +563,18 @@ async function sendMessage() {
                 }),
             });
         } else {
-            // Secure call to /api/chat handled by Node server or Vercel Serverless Function
-            try {
-                response = await fetch("/api/chat", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        model: currentModel,
-                        messages: messagesPayload,
-                        temperature: 0.7,
-                    }),
-                });
-            } catch (networkErr) {
-                // If /api/chat is not running and fallback key is available, try fallback
-                if (fallbackApiKey) {
-                    console.warn("/api/chat unreachable, attempting local fallback...");
-                    response = await fetch(API_URL, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${fallbackApiKey}`,
-                        },
-                        body: JSON.stringify({
-                            model: currentModel,
-                            messages: messagesPayload,
-                            temperature: 0.7,
-                        }),
-                    });
-                } else {
-                    throw networkErr;
-                }
-            }
-
-            // Fallback for static servers if /api/chat returns 404
-            if (response && response.status === 404 && fallbackApiKey) {
-                console.warn("/api/chat not found (static host), using local key fallback...");
-                response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${fallbackApiKey}`,
-                    },
-                    body: JSON.stringify({
-                        model: currentModel,
-                        messages: messagesPayload,
-                        temperature: 0.7,
-                    }),
-                });
-            }
+            // Secure call to /api/chat handled by Vercel Serverless Function or local Node server
+            response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    model: currentModel,
+                    messages: messagesPayload,
+                    temperature: 0.7,
+                }),
+            });
         }
 
         if (!response.ok) {
